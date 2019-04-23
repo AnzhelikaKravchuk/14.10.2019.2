@@ -126,7 +126,7 @@ namespace PseudoEnumerable.Tests
         #endregion
 
         [Test]
-        public void sstring()
+        public void SortBy_string_intParse()
         {
             string[] array = new string[] { "23", "1", "32" };
 
@@ -138,13 +138,67 @@ namespace PseudoEnumerable.Tests
         }
 
         [Test]
-        public void s_int()
+        public void SortBy_string_length()
         {
             string[] array = new string[] { "23", "1",  "32" };
 
             string[] expected = new string[] { "1", "23", "32" };
 
             string[] actual = array.SortBy(el => el.Length).ToArray();
+
+            CollectionAssert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void Range_count_17()
+        {
+            List<int> expected = new List<int>()
+            {
+                1,
+                2,
+                3,
+                4,
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17
+            };
+
+            List<int> actual = Enumerable.Range(17).ToList();
+
+            CollectionAssert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void Range_count_13_start_5()
+        {
+            List<int> expected = new List<int>()
+            {
+                5,
+                6,
+                7,
+                8,
+                9,
+                10,
+                11,
+                12,
+                13,
+                14,
+                15,
+                16,
+                17
+            };
+
+            List<int> actual = Enumerable.Range(13, 5).ToList();
 
             CollectionAssert.AreEqual(expected, actual);
         }

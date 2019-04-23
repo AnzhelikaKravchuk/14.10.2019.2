@@ -191,6 +191,21 @@ namespace PseudoEnumerable
 
             return true;
         }
+        
+        public static IEnumerable<int> Range(int count, int start = 1)
+        {
+
+            return Range();
+
+            IEnumerable<int> Range()
+            {
+                int current = start;
+                for (int i = 0; i < count; i++)
+                {
+                    yield return current++;
+                }
+            }
+        }
 
         private class ComparerAdapter<TSource, TKey> : IComparer
         {
