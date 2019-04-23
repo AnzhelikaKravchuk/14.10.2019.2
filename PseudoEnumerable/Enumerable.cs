@@ -19,7 +19,7 @@ namespace PseudoEnumerable
         /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Throws if <paramref name="predicate"/> is null.</exception>
         public static IEnumerable<TSource> Filter<TSource>(this IEnumerable<TSource> source,
-            Func<TSource,bool> predicate)
+            Func<TSource, bool> predicate)
         {
             Validation(source);
             return FilterCore();
@@ -105,7 +105,29 @@ namespace PseudoEnumerable
         /// <exception cref="InvalidCastException">An element in the sequence cannot be cast to type TResult.</exception>
         public static IEnumerable<TResult> CastTo<TResult>(IEnumerable source)
         {
-            throw new NotImplementedException();
+            if (source is null)
+            {
+                throw new ArgumentNullException($"{nameof(source)} is null");
+            }
+
+            return CastCore();
+
+            IEnumerable<TResult> CastCore()
+            {
+                foreach (var item in source)
+                {
+                    if (item is TResult)
+                    {
+                        yield return (TResult)item;
+                    }
+                    else
+                    {
+                        throw new InvalidCastException($"An element in the sequence cannot be cast to type TResult");
+                    }
+                }
+            }
+
+
         }
 
         /// <summary>
@@ -126,7 +148,7 @@ namespace PseudoEnumerable
             bool result = true;
             foreach (var item in source)
             {
-                if(!predicate(item))
+                if (!predicate(item))
                 {
                     result = false;
                     break;
