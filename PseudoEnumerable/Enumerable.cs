@@ -21,11 +21,19 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> Filter<TSource>(this IEnumerable<TSource> source,
             Func<TSource,bool> predicate)
         {
-            foreach (var item in source)
+            CheckToNull(source, nameof(source));
+            CheckToNull(predicate, nameof(predicate));
+
+            return Filter();
+
+            IEnumerable<TSource> Filter()
             {
-                if (predicate(item))
+                foreach (var item in source)
                 {
-                    yield return item;
+                    if (predicate(item))
+                    {
+                        yield return item;
+                    }
                 }
             }
         }
@@ -46,9 +54,17 @@ namespace PseudoEnumerable
         public static IEnumerable<TResult> Transform<TSource, TResult>(this IEnumerable<TSource> source,
             Func<TSource, TResult> transformer)
         {
-            foreach (var item in source)
+            CheckToNull(source, nameof(source));
+            CheckToNull(transformer, nameof(transformer));
+
+            return Transform();
+
+            IEnumerable<TResult> Transform()
             {
-                yield return transformer(item);
+                foreach (var item in source)
+                {
+                    yield return transformer(item);
+                }
             }
         }
 
@@ -111,12 +127,18 @@ namespace PseudoEnumerable
         /// <exception cref="InvalidCastException">An element in the sequence cannot be cast to type TResult.</exception>
         public static IEnumerable<TResult> CastTo<TResult>(IEnumerable source)
         {
-            
-            foreach (var item in source)
+            CheckToNull(source, nameof(source));
+
+            return Transform();
+
+            IEnumerable<TResult> Transform()
             {
-                yield return (TResult)item;
+                foreach (var item in source)
+                {
+                    yield return (TResult) item;
+                }
             }
-            
+
         }
 
         /// <summary>
@@ -133,6 +155,9 @@ namespace PseudoEnumerable
         /// <exception cref="ArgumentNullException">Throws if <paramref name="predicate"/> is null.</exception>
         public static bool ForAll<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
+            CheckToNull(source, nameof(source));
+            CheckToNull(predicate, nameof(predicate));
+
             foreach (var item in source)
             {
                 if (!predicate(item))
@@ -142,6 +167,14 @@ namespace PseudoEnumerable
             }
 
             return true;
+        }
+
+        private static void CheckToNull(object obj, string name)
+        {
+            if (obj == null)
+            {
+                throw new ArgumentNullException($"{name} cannot be null");
+            }
         }
     }
 }
