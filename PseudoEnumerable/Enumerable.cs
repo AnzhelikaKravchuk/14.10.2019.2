@@ -21,13 +21,9 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> Filter<TSource>(this IEnumerable<TSource> source,
             Func<TSource, bool> predicate)
         {
-            foreach (var element in source)
-            {
-                if (predicate(element))
-                {
-                    yield return element;
-                }
-            }
+            CatchExceptionNull(source);
+            CatchExceptionNull(predicate);
+            return source.FilterLazy(predicate);
         }
 
         /// <summary>
@@ -99,10 +95,8 @@ namespace PseudoEnumerable
         /// <exception cref="InvalidCastException">An element in the sequence cannot be cast to type TResult.</exception>
         public static IEnumerable<TResult> CastTo<TResult>(IEnumerable source)
         {
-            foreach (var element in source)
-            {
-                yield return (TResult)element;
-            }
+            CatchExceptionNull(source);
+            return CastToLazy<TResult>(source);
         }
 
         /// <summary>
@@ -134,5 +128,34 @@ namespace PseudoEnumerable
 
             return true;
         }
+
+        private static IEnumerable<TSource> FilterLazy<TSource>(this IEnumerable<TSource> source,
+            Func<TSource, bool> predicate)
+        {
+            foreach (var element in source)
+            {
+                if (predicate(element))
+                {
+                    yield return element;
+                }
+            }
+        }
+
+        private static IEnumerable<TResult> CastToLazy<TResult>(IEnumerable source)
+        {
+            foreach (var element in source)
+            {
+                yield return (TResult) element;
+            }
+        }
+
+        private static void CatchExceptionNull<T>(T source)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException($"Argument {nameof(source)} is null.");
+            }
+        }
+
     }
 }
