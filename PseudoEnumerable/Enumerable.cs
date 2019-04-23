@@ -30,7 +30,13 @@ namespace PseudoEnumerable
             {
                 throw new ArgumentNullException(nameof(predicate));
             }
-            
+
+            return Filter_(source, predicate);
+        }
+
+        private static IEnumerable<TSource> Filter_<TSource>(IEnumerable<TSource> source,
+            Func<TSource, bool> predicate)
+        {            
             foreach (var i in source)
             {
                 if (predicate(i))
@@ -109,7 +115,17 @@ namespace PseudoEnumerable
         /// <exception cref="InvalidCastException">An element in the sequence cannot be cast to type TResult.</exception>
         public static IEnumerable<TResult> CastTo<TResult>(IEnumerable source)
         {
-            throw new NotImplementedException();
+            foreach(var item in source)
+            {
+                if(item is TResult)
+                {
+                    yield return (TResult)item;
+                }
+                else
+                {
+                    throw new InvalidCastException(nameof(item));
+                }
+            }
         }
 
         /// <summary>
