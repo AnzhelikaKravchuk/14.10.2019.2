@@ -19,9 +19,19 @@ namespace PseudoEnumerable
         /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Throws if <paramref name="predicate"/> is null.</exception>
         public static IEnumerable<TSource> Filter<TSource>(this IEnumerable<TSource> source,
-            Func<TSource,bool> predicate)
+            Func<TSource, bool> predicate)
         {
-            throw new NotImplementedException();
+            if (source == null)
+            {
+                throw new ArgumentNullException($"Source cannot be null. Parameter name: { nameof(source) }.");
+            }
+
+            if (predicate == null)
+            {
+                throw new ArgumentNullException($"Predicate cannot be null. Parameter name: { nameof(predicate) }.");
+            }
+
+            return GetFilteredArray(source, predicate);
         }
 
         /// <summary>
@@ -93,7 +103,20 @@ namespace PseudoEnumerable
         /// <exception cref="InvalidCastException">An element in the sequence cannot be cast to type TResult.</exception>
         public static IEnumerable<TResult> CastTo<TResult>(IEnumerable source)
         {
-            throw new NotImplementedException();
+            if (source == null)
+            {
+                throw new ArgumentNullException($"Source cannot be null. Parameter name: { nameof(source) }.");
+            }
+
+            return CastToLazy<TResult>(source);
+        }
+
+        private static IEnumerable<TResult> CastToLazy<TResult>(IEnumerable source)
+        {
+            foreach (var element in source)
+            {
+                yield return (TResult)element;
+            }
         }
 
         /// <summary>
@@ -110,7 +133,60 @@ namespace PseudoEnumerable
         /// <exception cref="ArgumentNullException">Throws if <paramref name="predicate"/> is null.</exception>
         public static bool ForAll<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            throw new NotImplementedException();
+            if (source == null)
+            {
+                throw new ArgumentNullException($"Source cannot be null. Parameter name: { nameof(source) }.");
+            }
+
+            if (predicate == null)
+            {
+                throw new ArgumentNullException($"Predicate cannot be null. Parameter name: { nameof(predicate) }.");
+            }
+
+            foreach (var element in source)
+            {
+                if (!predicate.Invoke(element))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
+
+        #region private methods
+
+        private static IEnumerable<TSource> GetFilteredArray<TSource>(IEnumerable<TSource> array, Func<TSource, bool> filter)
+        {
+            foreach (var elemnt in array)
+            {
+                if (filter.Invoke(elemnt))
+                {
+                    yield return elemnt;
+                }
+            }
+        }
+
+        private static IEnumerable<TResult> GetTransformedArray<TSource, TResult>(IEnumerable<TSource> array, Converter<TSource, TResult> transformer)
+        {
+            foreach (var element in array)
+            {
+                yield return transformer.Invoke(element);
+            }
+        }
+
+        private static void CheckInput<T>(T[] sortedArray)
+        {
+            if (sortedArray == null)
+            {
+                throw new ArgumentNullException($"Array can not be null. { nameof(sortedArray) }.");
+            }
+
+            if (sortedArray.Length == 0)
+            {
+                throw new ArgumentException($"Array can not be empty. { nameof(sortedArray) }.");
+            }
+        }
+        #endregion
     }
 }
