@@ -95,7 +95,12 @@ namespace PseudoEnumerable
         /// <exception cref="InvalidCastException">An element in the sequence cannot be cast to type TResult.</exception>
         public static IEnumerable<TResult> CastTo<TResult>(IEnumerable source)
         {
-            throw new NotImplementedException();
+            if (source == null)
+            {
+                throw new ArgumentNullException($"{nameof(source)} must be not null.");
+            }
+
+            return CastToLazyEnumeration<TResult>(source);
         }
 
         /// <summary>
@@ -167,6 +172,21 @@ namespace PseudoEnumerable
                 if (!predicate(item))
                 {
                     yield return item;
+                }
+            }
+        }
+
+        private static IEnumerable<TResult> CastToLazyEnumeration<TResult>(IEnumerable source)
+        {
+            foreach (var item in source)
+            {
+                if (item is TResult)
+                {
+                    yield return (TResult)item;
+                }
+                else
+                {
+                    throw new InvalidCastException($"Cant cast {source} items.");
                 }
             }
         }
