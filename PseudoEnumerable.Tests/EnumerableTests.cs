@@ -10,6 +10,13 @@ namespace PseudoEnumerable.Tests
     [TestFixture]
     public class EnumerableTests
     {
+        [Test]
+        public void Filter_SourceIsNull_ThrowsArgumentNullException()
+        {
+            int[] source = null;
+            Assert.Throws<ArgumentNullException>(() => Enumerable.Filter(source, x => x % 2 == 0));
+        }
+
         [TestCase(new int[] { 1, 2, 3, 4, 5, 6 }, ExpectedResult = new int[] { 2, 4, 6 })]
         public IEnumerable<int> Filter_FiltersNumbers(IEnumerable<int> source)
             => Enumerable.Filter(source, x => x % 2 == 0);

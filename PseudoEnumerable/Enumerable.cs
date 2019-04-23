@@ -23,11 +23,16 @@ namespace PseudoEnumerable
         {
             CheckParams(source, predicate);
 
-            foreach (var element in source)
+            return FilterInternal();
+
+            IEnumerable<TSource> FilterInternal()
             {
-                if (predicate(element))
+                foreach (var element in source)
                 {
-                    yield return element;
+                    if (predicate(element))
+                    {
+                        yield return element;
+                    }
                 }
             }
         }
