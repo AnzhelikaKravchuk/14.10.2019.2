@@ -21,7 +21,23 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> Filter<TSource>(this IEnumerable<TSource> source,
             Func<TSource,bool> predicate)
         {
-            throw new NotImplementedException();
+            if (source is null)
+            {
+                throw new ArgumentNullException(nameof(source), $"{nameof(source)} is null.");
+            }
+
+            if (predicate is null)
+            {
+                throw new ArgumentNullException(nameof(predicate), $"{nameof(predicate)} is null.");
+            }
+
+            foreach (var element in source)
+            {
+                if (predicate(element))
+                {
+                    yield return element;
+                }
+            }
         }
 
         /// <summary>
