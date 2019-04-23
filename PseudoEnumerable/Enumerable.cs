@@ -48,7 +48,11 @@ namespace PseudoEnumerable
         public static IEnumerable<TResult> Transform<TSource, TResult>(this IEnumerable<TSource> source,
             Func<TSource, TResult> transformer)
         {
-            throw new NotImplementedException();
+            ValidateTransform(source, transformer);
+            foreach (var item in source)
+            {
+                yield return transformer(item);
+            }
         }
 
         /// <summary>
@@ -101,7 +105,18 @@ namespace PseudoEnumerable
         /// <exception cref="InvalidCastException">An element in the sequence cannot be cast to type TResult.</exception>
         public static IEnumerable<TResult> CastTo<TResult>(IEnumerable source)
         {
-            throw new NotImplementedException();
+            ValidateCastTo(source);
+            foreach (var item in source)
+            {
+                if (item is TResult)
+                {
+                    yield return (TResult)item;
+                }
+                else
+                {
+                    throw new InvalidCastException($"cannot cast to {typeof(TResult)}");
+                }
+            }
         }
 
         /// <summary>
@@ -150,5 +165,27 @@ namespace PseudoEnumerable
                 throw new ArgumentNullException($"{nameof(predicate)} is null");
             }
         }
+
+        private static void ValidateTransform<TSource, TResult>(this IEnumerable<TSource> source, Func<TSource, TResult> transformer)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException($"{nameof(source)} is null");
+            }
+
+            if (transformer == null)
+            {
+                throw new ArgumentNullException($"{nameof(transformer)} is null");
+            }
+        }
+
+        private static void ValidateCastTo(IEnumerable source)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException($"{nameof(source)} is null");
+            }
+        }
+        
     }
 }
