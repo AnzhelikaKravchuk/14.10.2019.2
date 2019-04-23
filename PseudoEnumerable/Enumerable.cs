@@ -21,7 +21,9 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> Filter<TSource>(this IEnumerable<TSource> source,
             Func<TSource,bool> predicate)
         {
-            throw new NotImplementedException();
+            FilterCheckingExceptions(source, predicate);
+
+            return FilterLazyEnumeration(source, predicate);
         }
 
         /// <summary>
@@ -110,7 +112,65 @@ namespace PseudoEnumerable
         /// <exception cref="ArgumentNullException">Throws if <paramref name="predicate"/> is null.</exception>
         public static bool ForAll<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            throw new NotImplementedException();
+            ForAllCheckingExceptions(source, predicate);
+
+            foreach (var item in source)
+            {
+                if (!predicate(item))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
+
+        #region Private Methods
+
+        private static bool FilterCheckingExceptions<TSource>(this IEnumerable<TSource> source,
+            Func<TSource, bool> predicate)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException($"{nameof(source)} must be not null.");
+            }
+
+            if (predicate == null)
+            {
+                throw new ArgumentNullException($"{nameof(predicate)} must be not null.");
+            }
+
+            return true;
+        }
+
+        private static bool ForAllCheckingExceptions<TSource>(this IEnumerable<TSource> source,
+            Func<TSource, bool> predicate)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException($"{nameof(source)} must be not null.");
+            }
+
+            if (predicate == null)
+            {
+                throw new ArgumentNullException($"{nameof(predicate)} must be not null.");
+            }
+
+            return true;
+        }
+
+        private static IEnumerable<TSource> FilterLazyEnumeration<TSource>(this IEnumerable<TSource> source,
+            Func<TSource, bool> predicate)
+        {
+            foreach (var item in source)
+            {
+                if (!predicate(item))
+                {
+                    yield return item;
+                }
+            }
+        }
+
+        #endregion
     }
 }
