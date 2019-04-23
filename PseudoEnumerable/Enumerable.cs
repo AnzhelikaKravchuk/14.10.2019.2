@@ -101,7 +101,13 @@ namespace PseudoEnumerable
         /// <exception cref="InvalidCastException">An element in the sequence cannot be cast to type TResult.</exception>
         public static IEnumerable<TResult> CastTo<TResult>(IEnumerable source)
         {
-            throw new NotImplementedException();
+            foreach (var item in source)
+            {
+                if (item is TResult)
+                {
+                    yield return (TResult)item;
+                }
+            }
         }
 
         /// <summary>
