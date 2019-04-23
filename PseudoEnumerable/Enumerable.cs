@@ -21,7 +21,19 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> Filter<TSource>(this IEnumerable<TSource> source,
             Func<TSource,bool> predicate)
         {
-            throw new NotImplementedException();
+            Validation(source);
+            return FilterCore();
+
+            IEnumerable<TSource> FilterCore()
+            {
+                foreach (var item in source)
+                {
+                    if (predicate(item))
+                    {
+                        yield return item;
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -110,7 +122,33 @@ namespace PseudoEnumerable
         /// <exception cref="ArgumentNullException">Throws if <paramref name="predicate"/> is null.</exception>
         public static bool ForAll<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            throw new NotImplementedException();
+            Validation(source);
+            bool result = true;
+            foreach (var item in source)
+            {
+                if(!predicate(item))
+                {
+                    result = false;
+                    break;
+                }
+            }
+
+            return result;
+        }
+
+        private static void Validation<T>(IEnumerable<T> source)
+        {
+            if (source is null)
+            {
+                throw new ArgumentNullException($"{nameof(source)} is null");
+            }
+
+            ICollection<T> collection = source as ICollection<T>;
+
+            if (collection.Count is 0)
+            {
+                throw new ArgumentException($"{nameof(source)} is empty");
+            }
         }
     }
 }
