@@ -76,9 +76,12 @@ namespace PseudoEnumerable.Tests
             Assert.AreEqual(source.ForAll(new Func<string, bool>(x => x.Length != 0)), expected);
         }
 
-        public void CastTo_Tests(IEnumerable<object> source)
+        [TestCase(new string[] { "4444", "22", "666666", "1", "", "333" }, 
+            new string[] { "", "1", "22", "333", "4444", "666666"})]
+        public void SortBy_Tests(IEnumerable<string> source, IEnumerable<string> expected)
         {
-
+            var actual = source.SortBy(new Func<string, int>(x => x.Length));
+            CollectionAssert.AreEqual(expected, actual);
         }
 
 

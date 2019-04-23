@@ -70,7 +70,22 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> SortBy<TSource, TKey>(this IEnumerable<TSource> source,
             Func<TSource, TKey> key)
         {
-            throw new NotImplementedException();
+            ValidateSortBy(source, key);
+            var sourceList = new List<TSource>();
+            foreach (var item in source)
+            {
+                sourceList.Add(item);
+            }
+
+            var sourceArray = sourceList.ToArray();
+            var keys = new TKey[sourceList.Count];
+            for (int i = 0; i < keys.Length; i++)
+            {
+                keys[i] = key(sourceList[i]);
+            }
+
+            Array.Sort(keys, sourceArray);
+            return sourceArray;
         }
 
         /// <summary>
@@ -186,6 +201,18 @@ namespace PseudoEnumerable
                 throw new ArgumentNullException($"{nameof(source)} is null");
             }
         }
-        
+
+        private static void ValidateSortBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> key)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException($"{nameof(source)} is null");
+            }
+
+            if (key == null)
+            {
+                throw new ArgumentNullException($"{nameof(key)} is null");
+            }
+        }
     }
 }
