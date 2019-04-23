@@ -21,7 +21,9 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> Filter<TSource>(this IEnumerable<TSource> source,
             Func<TSource,bool> predicate)
         {
-            throw new NotImplementedException();
+            CheckArguments(source, predicate);
+
+            return FilterLogic(source, predicate);
         }
 
         /// <summary>
@@ -110,7 +112,53 @@ namespace PseudoEnumerable
         /// <exception cref="ArgumentNullException">Throws if <paramref name="predicate"/> is null.</exception>
         public static bool ForAll<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            throw new NotImplementedException();
+            CheckArguments(source, predicate);
+
+            return ForAllLogic(source, predicate);
         }
+
+
+        #region Private methods
+        private static void CheckArguments<TSource>(IEnumerable<TSource> source, dynamic predicate)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException($"{nameof(source)} must not be  null");
+            }
+
+            if (predicate == null)
+            {
+                throw new ArgumentNullException($"{nameof(predicate)} must not be null");
+            }
+        }
+
+        private static bool ForAllLogic<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
+        {
+            bool result = true;
+
+            foreach(TSource item in source)
+            {
+                if (!predicate(item))
+                {
+                    result = false;
+                }
+            }
+
+            return result;
+        }
+
+        private static IEnumerable<TSource> FilterLogic<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate)
+        {
+            foreach (TSource item in source)
+            {
+                if (predicate(item))
+                {
+                    yield return item;
+                }
+            }
+        }
+
+        #endregion
+
     }
 }
