@@ -83,16 +83,17 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> SortBy<TSource, TKey>(this IEnumerable<TSource> source,
             Func<TSource, TKey> key)
         {
-            /*
-            TSource[] copiedArray = new List<TSource>(source).ToArray();
+            CheckToNull(source, nameof(source));
+            CheckToNull(key, nameof(key));
 
-            Array.Sort(copiedArray, comparer);
+            return Transform();
 
-            foreach (var item in copiedArray)
+            IEnumerable<TSource> Transform()
             {
-                yield return item;
-            }*/
-            throw new NotImplementedException();
+                IComparer<TKey> comparer = Comparer<TKey>.Default;
+
+                return SortBy(source, key, comparer);
+            }
         }
 
         /// <summary>
@@ -112,7 +113,29 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> SortBy<TSource, TKey>(this IEnumerable<TSource> source,
             Func<TSource, TKey> key, IComparer<TKey> comparer)
         {
-            throw new NotImplementedException();
+            CheckToNull(source, nameof(source));
+            CheckToNull(key, nameof(key));
+
+            return Transform();
+
+            IEnumerable<TSource> Transform()
+            {
+                var copiedList = new List<KeyValuePair<TSource, TKey>>();
+
+                foreach (var item in source)
+                {
+                    copiedList.Add(new KeyValuePair<TSource, TKey>(item, key(item)));
+                }
+
+                KeyValuePair<TSource, TKey>[] copiedArray = copiedList.ToArray();
+
+                Array.Sort(copiedArray, new ComparerAdapter<TSource, TKey>(comparer));
+
+                foreach (var item in copiedArray)
+                {
+                    yield return item.Key;
+                }
+            }
         }
 
         /// <summary>
@@ -167,6 +190,19 @@ namespace PseudoEnumerable
             }
 
             return true;
+        }
+
+        private class ComparerAdapter<TSource, TKey> : IComparer
+        {
+            private IComparer<TKey> _comparer;
+
+            public ComparerAdapter(IComparer<TKey> comparer)
+            {
+                _comparer = comparer;
+            }
+
+            public int Compare(object x, object y) =>
+                _comparer.Compare(((KeyValuePair<TSource, TKey>)x).Value, ((KeyValuePair<TSource, TKey>)y).Value);
         }
 
         private static void CheckToNull(object obj, string name)

@@ -70,7 +70,7 @@ namespace PseudoEnumerable.Tests
 
             string[] actual = array.Filter(el => el.Length == 1).ToArray();
 
-            Th.AreEqual(expected, actual);
+            //Th.AreEqual(expected, actual);
         }
 
         #endregion
@@ -124,5 +124,29 @@ namespace PseudoEnumerable.Tests
             CollectionAssert.AreEqual(expected, actual);
         }
         #endregion
+
+        [Test]
+        public void sstring()
+        {
+            string[] array = new string[] { "23", "1", "32" };
+
+            string[] expected = new string[] { "1", "23", "32" };
+
+            string[] actual = array.SortBy(el => int.Parse(el)).ToArray();
+
+            CollectionAssert.AreEqual(expected, actual);
+        }
+
+        [Test]
+        public void s_int()
+        {
+            string[] array = new string[] { "23", "1",  "32" };
+
+            string[] expected = new string[] { "1", "23", "32" };
+
+            string[] actual = array.SortBy(el => el.Length).ToArray();
+
+            CollectionAssert.AreEqual(expected, actual);
+        }
     }
 }
