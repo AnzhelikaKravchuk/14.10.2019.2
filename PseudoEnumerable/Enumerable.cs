@@ -71,16 +71,13 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> SortBy<TSource, TKey>(this IEnumerable<TSource> source,
             Func<TSource, TKey> key)
         {
-            SortedDictionary<TKey, TSource> dictionary = new SortedDictionary<TKey, TSource>();
+            List<TSource> array = new List<TSource>(source);
 
-            foreach (var item in source)
-            {
-                dictionary.Add(key.Invoke(item), item);
-            }
+            array.Sort((a, b) => Comparer.Default.Compare(key(a), key(b)));
 
-            foreach (var item in dictionary)
+            foreach (var item in array)
             {
-                yield return item.Value;
+                yield return item;
             }
         }
 
