@@ -1,11 +1,41 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-
 namespace PseudoEnumerable
 {
     public static class Enumerable
     {
+        /// <summary>
+        /// Generates <paramref name="count"/> integral numbers from number <paramref name="start"/>.
+        /// </summary>
+        /// <param name="start">The start.</param>
+        /// <param name="count">The count of numbers.</param>
+        /// <returns>
+        ///    An <see cref="IEnumerable{int}"/> that contains <paramref name="count"/> numbers
+        ///    from the <paramref name="start"/>.
+        /// </returns>
+        /// <exception cref="ArgumentException">
+        /// Throws if <paramref name="count"/> is less or equals 0.
+        /// </exception>
+        public static IEnumerable<int> GenerateIntegralNumbers(int start, int count)
+        {
+            if (count <= 0)
+            {
+                throw new ArgumentException($"{count} is less or equals 0");
+            }
+
+            return GenerateIntegralNumbersCore();
+
+            IEnumerable<int> GenerateIntegralNumbersCore()
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return start++;
+                }
+            }
+        }
+
+
         /// <summary>
         /// Filters a sequence of values based on a predicate.
         /// </summary>
@@ -21,7 +51,7 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> Filter<TSource>(this IEnumerable<TSource> source,
             Func<TSource, bool> predicate)
         {
-            Validation(source);
+            Validation(source, predicate);
             return FilterCore();
 
             IEnumerable<TSource> FilterCore()
@@ -52,7 +82,16 @@ namespace PseudoEnumerable
         public static IEnumerable<TResult> Transform<TSource, TResult>(this IEnumerable<TSource> source,
             Func<TSource, TResult> transformer)
         {
-            throw new NotImplementedException();
+            Validation(source, transformer);
+            return TransformCore();
+
+            IEnumerable<TResult> TransformCore()
+            {
+                foreach (var element in source)
+                {
+                    yield return transformer(element);
+                }
+            }
         }
 
         /// <summary>
@@ -70,7 +109,29 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> SortBy<TSource, TKey>(this IEnumerable<TSource> source,
             Func<TSource, TKey> key)
         {
-            throw new NotImplementedException();
+            Validation(source, key);
+            var comparer = GetDefaultComparer<TKey>();
+            return SortByCore(source, key, comparer);
+        }
+
+        /// <summary>
+        /// Sorts the elements of a sequence in descending order according to a key.
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of source.</typeparam>
+        /// <typeparam name="TKey">The type of the key returned by key.</typeparam>
+        /// <param name="source">A sequence of values to order.</param>
+        /// <param name="key">A function to extract a key from an element.</param>
+        /// <returns>
+        ///     An <see cref="IEnumerable{TSource}"/> whose elements are sorted according to a key.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="key"/> is null.</exception>
+        public static IEnumerable<TSource> SortByDescending<TSource, TKey>(this IEnumerable<TSource> source,
+            Func<TSource, TKey> key)
+        {
+            Validation(source, key);
+            var comparer = GetDefaultComparer<TKey>();
+            return SortByCore(source, key, new ReverseComparer<TKey>(comparer));
         }
 
         /// <summary>
@@ -90,7 +151,31 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> SortBy<TSource, TKey>(this IEnumerable<TSource> source,
             Func<TSource, TKey> key, IComparer<TKey> comparer)
         {
-            throw new NotImplementedException();
+            Validation(source, key, comparer);
+            CheckIfComparable<TSource>();
+            return SortByCore(source, key, comparer);
+        }
+
+        /// <summary>
+        /// Sorts the elements of a sequence in descending order according by using a specified comparer for a key .
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of source.</typeparam>
+        /// <typeparam name="TKey">The type of the key returned by key.</typeparam>
+        /// <param name="source">A sequence of values to order.</param>
+        /// <param name="key">A function to extract a key from an element.</param>
+        /// <param name="comparer">An <see cref="IComparer{T}"/> to compare keys.</param>
+        /// <returns>
+        ///     An <see cref="IEnumerable{TSource}"/> whose elements are sorted according to a key.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="comparer"/> is null.</exception>
+        public static IEnumerable<TSource> SortByDescending<TSource, TKey>(this IEnumerable<TSource> source,
+            Func<TSource, TKey> key, IComparer<TKey> comparer)
+        {
+            Validation(source, key, comparer);
+            CheckIfComparable<TSource>();
+            return SortByCore(source, key, new ReverseComparer<TKey>(comparer));
         }
 
         /// <summary>
@@ -110,9 +195,14 @@ namespace PseudoEnumerable
                 throw new ArgumentNullException($"{nameof(source)} is null");
             }
 
-            return CastCore();
+            if (source is IEnumerable<TResult> resultSource)
+            {
+                return resultSource;
+            }
 
-            IEnumerable<TResult> CastCore()
+            return CastToCore();
+
+            IEnumerable<TResult> CastToCore()
             {
                 foreach (var item in source)
                 {
@@ -144,7 +234,7 @@ namespace PseudoEnumerable
         /// <exception cref="ArgumentNullException">Throws if <paramref name="predicate"/> is null.</exception>
         public static bool ForAll<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            Validation(source);
+            Validation(source, predicate);
             bool result = true;
             foreach (var item in source)
             {
@@ -163,13 +253,68 @@ namespace PseudoEnumerable
             if (source is null)
             {
                 throw new ArgumentNullException($"{nameof(source)} is null");
+            }           
+        }
+
+        private static void Validation<T>(IEnumerable<T> source, object predicate)
+        {
+            if (predicate is null)
+            {
+                throw new ArgumentNullException($"{nameof(predicate)} is null");
             }
 
-            ICollection<T> collection = source as ICollection<T>;
+            Validation(source);
+        }
 
-            if (collection.Count is 0)
+        private static void Validation<T>(IEnumerable<T> source, object predicate, object comparer)
+        {
+            if (comparer is null)
             {
-                throw new ArgumentException($"{nameof(source)} is empty");
+                throw new ArgumentNullException($"{nameof(comparer)} is null");
+            }
+
+            Validation(source, predicate);
+        }
+
+        private static void CheckIfComparable<T>()
+        {            
+            Comparer<T> defaultComparer = Comparer<T>.Default;            
+            if (defaultComparer is null)
+            {
+                throw new ArgumentException($"{nameof(defaultComparer)} can be null only if type has its own implementation of IComparable");
+            }
+        }
+
+        private static Comparer<T> GetDefaultComparer<T>()
+        {
+            CheckIfComparable<T>();
+            return Comparer<T>.Default;
+        }
+
+        private static IEnumerable<TSource> SortByCore<TSource, TKey>(IEnumerable<TSource> source,
+            Func<TSource, TKey> key, IComparer<TKey> comparer = null)
+        {
+            var _comparer = comparer ?? GetDefaultComparer<TKey>();
+            List<TSource> list = new List<TSource>(source);
+            list.Sort((x, y) => _comparer.Compare(key(x), key(y)));
+            foreach (var element in list)
+            {
+                yield return element;
+            }
+        }
+
+        internal class ReverseComparer<T> : IComparer<T>
+        {
+            private IComparer<T> comparer;
+
+            internal ReverseComparer(IComparer<T> comparer)
+            {
+                this.comparer = comparer;
+            }
+
+            public int Compare(T x, T y)
+            {
+                return -comparer.Compare(x, y);
             }
         }
     }
