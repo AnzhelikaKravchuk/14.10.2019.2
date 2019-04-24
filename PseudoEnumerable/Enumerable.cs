@@ -50,7 +50,22 @@ namespace PseudoEnumerable
         public static IEnumerable<TResult> Transform<TSource, TResult>(this IEnumerable<TSource> source,
             Func<TSource, TResult> transformer)
         {
-            throw new NotImplementedException();
+            if (source == null)
+            {
+                throw new ArgumentNullException($"Array can not be null. Parameter name: { nameof(source) }.");
+            }
+
+            if (!source.GetEnumerator().MoveNext())
+            {
+                throw new ArgumentException($"The array should contain at least 1 element. Parameter name: { nameof(source) }");
+            }
+
+            if (transformer == null)
+            {
+                throw new ArgumentNullException($"Predicate can not be null. Parameter name: { nameof(transformer) }.");
+            }
+
+            return GetTransformedArray(source, transformer);
         }
 
         /// <summary>
@@ -68,7 +83,7 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> SortBy<TSource, TKey>(this IEnumerable<TSource> source,
             Func<TSource, TKey> key)
         {
-            throw new NotImplementedException();
+            return SortBy(source, key, Comparer<TKey>.Default);
         }
 
         /// <summary>
@@ -88,7 +103,72 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> SortBy<TSource, TKey>(this IEnumerable<TSource> source,
             Func<TSource, TKey> key, IComparer<TKey> comparer)
         {
-            throw new NotImplementedException();
+            if (comparer == null)
+            {
+                if (key is IComparable || key is IComparable<TKey>)
+                {
+                    comparer = Comparer<TKey>.Default;
+                }
+                {
+                    throw new ArgumentNullException($"Comparer can not be null. Parameter name: { nameof(comparer) }.");
+                }
+            }
+
+            if (source == null)
+            {
+                throw new ArgumentNullException($"Source can not be null. Parameter name: { nameof(source) }.");
+            }
+
+            if (key == null)
+            {
+                throw new ArgumentNullException($"Key cannot be null. Parameter name: { nameof(key) }.");
+            }
+
+            var sortedList = new List<TSource>(source);
+            var comparerKeys = new ComparerStrategy<TSource, TKey>(key, comparer);
+            sortedList.Sort(comparerKeys);
+
+            return sortedList;
+        }
+
+        /// <summary>
+        /// Sorts the elements of a sequence in descending order according to a key.
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of source.</typeparam>
+        /// <typeparam name="TKey">The type of the key returned by key.</typeparam>
+        /// <param name="source">A sequence of values to order.</param>
+        /// <param name="key">A function to extract a key from an element.</param>
+        /// <returns>
+        ///     An <see cref="IEnumerable{TSource}"/> whose elements are sorted according to a key.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="key"/> is null.</exception>
+        public static IEnumerable<TSource> SortByDescending<TSource, TKey>(this IEnumerable<TSource> source,
+            Func<TSource, TKey> key)
+        {
+            return SortByDescending(source, key, Comparer<TKey>.Default);
+        }
+
+        /// <summary>
+        /// Sorts the elements of a sequence in descending order according by using a specified comparer for a key .
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of source.</typeparam>
+        /// <typeparam name="TKey">The type of the key returned by key.</typeparam>
+        /// <param name="source">A sequence of values to order.</param>
+        /// <param name="key">A function to extract a key from an element.</param>
+        /// <param name="comparer">An <see cref="IComparer{T}"/> to compare keys.</param>
+        /// <returns>
+        ///     An <see cref="IEnumerable{TSource}"/> whose elements are sorted according to a key.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="comparer"/> is null.</exception>
+        public static IEnumerable<TSource> SortByDescending<TSource, TKey>(this IEnumerable<TSource> source,
+            Func<TSource, TKey> key, IComparer<TKey> comparer)
+        {
+            IComparer<TKey> descendingComparer = new ReverseComparer<TKey>(comparer);
+
+            return SortBy(source, key, descendingComparer);
         }
 
         /// <summary>
@@ -108,15 +188,12 @@ namespace PseudoEnumerable
                 throw new ArgumentNullException($"Source cannot be null. Parameter name: { nameof(source) }.");
             }
 
-            return CastToLazy<TResult>(source);
-        }
-
-        private static IEnumerable<TResult> CastToLazy<TResult>(IEnumerable source)
-        {
-            foreach (var element in source)
+            if (source is IEnumerable<TResult> resultSource)
             {
-                yield return (TResult)element;
+                return resultSource;
             }
+
+            return CastToLazy<TResult>(source);
         }
 
         /// <summary>
@@ -154,7 +231,49 @@ namespace PseudoEnumerable
             return true;
         }
 
+        /// <summary>
+        /// Generates the sequence.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="start">The start.</param>
+        /// <param name="count">The count.</param>
+        /// <param name="getNext">The method to get next.</param>
+        /// <returns></returns>
+        public static IEnumerable<T> GenerateSequence<T>(T start, int count, Func<T,T> getNext)
+        {
+            if (count < 1)
+            {
+                throw new ArgumentException(nameof(count));
+            }
+
+            if (getNext == null)
+            {
+                throw new ArgumentNullException($"Generator cannot be null: { nameof(getNext) }.");
+            }
+
+            return GenerateSequenceLazy<T>(start, count, getNext);
+        }
+
         #region private methods
+
+        private static IEnumerable<T> GenerateSequenceLazy<T>(T start, int count, Func<T, T> getNext)
+        {
+            T current = start;
+            for (int i = 0; i < count; i++)
+            {
+                T next = getNext(current);
+                yield return next;
+                current = next;
+            }
+        }
+
+        private static IEnumerable<TResult> CastToLazy<TResult>(IEnumerable source)
+        {
+            foreach (var element in source)
+            {
+                yield return (TResult)element;
+            }
+        }
 
         private static IEnumerable<TSource> GetFilteredArray<TSource>(IEnumerable<TSource> array, Func<TSource, bool> filter)
         {
@@ -167,7 +286,7 @@ namespace PseudoEnumerable
             }
         }
 
-        private static IEnumerable<TResult> GetTransformedArray<TSource, TResult>(IEnumerable<TSource> array, Converter<TSource, TResult> transformer)
+        private static IEnumerable<TResult> GetTransformedArray<TSource, TResult>(IEnumerable<TSource> array, Func<TSource, TResult> transformer)
         {
             foreach (var element in array)
             {
@@ -175,18 +294,42 @@ namespace PseudoEnumerable
             }
         }
 
-        private static void CheckInput<T>(T[] sortedArray)
+        #endregion
+
+        #region Adapters
+
+        private class ReverseComparer<T> : IComparer<T>
         {
-            if (sortedArray == null)
+            private readonly IComparer<T> comparer;
+
+            public ReverseComparer(IComparer<T> comparer)
             {
-                throw new ArgumentNullException($"Array can not be null. { nameof(sortedArray) }.");
+                this.comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
             }
 
-            if (sortedArray.Length == 0)
+            public int Compare(T x, T y)
             {
-                throw new ArgumentException($"Array can not be empty. { nameof(sortedArray) }.");
+                return -comparer.Compare(x, y);
             }
         }
+
+        private class ComparerStrategy<TSource, TKey> : IComparer<TSource>
+        {
+            private readonly Func<TSource, TKey> func;
+            private readonly IComparer<TKey> comparer;
+
+            public ComparerStrategy(Func<TSource, TKey> func, IComparer<TKey> comparer)
+            {
+                this.func = func ?? throw new ArgumentNullException(nameof(func));
+                this.comparer = comparer ?? throw new ArgumentNullException(nameof(comparer));
+            }
+
+            public int Compare(TSource x, TSource y)
+            {
+                return comparer.Compare(func(x), func(y));
+            }
+        }
+
         #endregion
     }
 }
