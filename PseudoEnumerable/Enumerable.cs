@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using System.Numerics;
 using System.Collections.Generic;
 
 namespace PseudoEnumerable
@@ -158,7 +159,24 @@ namespace PseudoEnumerable
             return true;
         }
 
-
+        /// <summary>
+        /// Generates a sequence of integers.
+        /// </summary>
+        /// <param name="count">Count of numbers to generate.</param>
+        /// <param name="start">The number from which the sequence is generated.</param>
+        /// <returns>
+        ///     An <see cref="IEnumerable{BigInteger}"/> that contains <paramref name="count"/> integers
+        ///     starting with <paramref name="start"/>.
+        /// </returns>
+        /// <exception cref="ArgumentOutOfRangeException">Throws if <paramref name="count"/> is less than zero.</exception>
+        public static IEnumerable<BigInteger> IntegerGenerator(BigInteger count, BigInteger start)
+        {
+            ValidateIntegerGenerator(count);
+            for (BigInteger i = 0; i < count; i++)
+            {
+                yield return start++;
+            }
+        }
         #endregion
 
         #region Private methods
@@ -213,7 +231,15 @@ namespace PseudoEnumerable
             {
                 throw new ArgumentNullException($"{nameof(comparer)} is null");
             }
-        } 
+        }
+
+        private static void ValidateIntegerGenerator(BigInteger count)
+        {
+            if (count < 0)
+            {
+                throw new ArgumentOutOfRangeException($"{nameof(count)} cannot be less than zero");
+            }
+        }
         #endregion
     }
 }
