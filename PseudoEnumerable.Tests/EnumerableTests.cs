@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using PseudoEnumerable.Tests.Comparers;
 using NUnit;
 using NUnit.Framework;
+
+
 
 namespace PseudoEnumerable.Tests
 {
@@ -78,9 +78,31 @@ namespace PseudoEnumerable.Tests
 
         [TestCase(new string[] { "4444", "22", "666666", "1", "", "333" }, 
             new string[] { "", "1", "22", "333", "4444", "666666"})]
-        public void SortBy_Tests(IEnumerable<string> source, IEnumerable<string> expected)
+        [TestCase(new string[] { "a", "aaa", "a", "aa", "aaaaaaaaaaa", "aaaaaa" },
+            new string[] { "a", "a", "aa", "aaa", "aaaaaa", "aaaaaaaaaaa" })]
+        [TestCase(new string[] { },
+            new string[] { })]
+        [TestCase(new string[] { "12345", "54321" },
+            new string[] { "12345", "54321" })]
+        public void SortBy_KeyIsIntegerFedaultComparer_Tests(IEnumerable<string> source, IEnumerable<string> expected)
         {
             var actual = source.SortBy(new Func<string, int>(x => x.Length));
+            CollectionAssert.AreEqual(expected, actual);
+        }
+
+        [TestCase(new string[] { "4444", "22", "666666", "1", "", "333" },
+            new string[] { "666666", "4444", "333", "22", "1", "" })]
+        [TestCase(new string[] { "abc", "a", "abcde", "abcdefg" },
+            new string[] { "abcdefg", "abcde", "abc", "a" })]
+        [TestCase(new string[] { },
+            new string[] { })]
+        [TestCase(new string[] { "one element" },
+            new string[] { "one element" })]
+        [TestCase(new string[] { "12345", "1234", "123", "12", "1", "" },
+            new string[] { "12345", "1234", "123", "12", "1", "" })]
+        public void SortBy_KeyIsIntegerCustomComparer_Tests(IEnumerable<string> source, IEnumerable<string> expected)
+        {
+            var actual = source.SortBy(new Func<string, int>(x => x.Length), new DescendingOrderComparer());
             CollectionAssert.AreEqual(expected, actual);
         }
 

@@ -6,6 +6,7 @@ namespace PseudoEnumerable
 {
     public static class Enumerable
     {
+        #region Public Api
         /// <summary>
         /// Filters a sequence of values based on a predicate.
         /// </summary>
@@ -19,7 +20,7 @@ namespace PseudoEnumerable
         /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Throws if <paramref name="predicate"/> is null.</exception>
         public static IEnumerable<TSource> Filter<TSource>(this IEnumerable<TSource> source,
-            Func<TSource,bool> predicate)
+            Func<TSource, bool> predicate)
         {
             ValidateFilter(source, predicate);
 
@@ -70,22 +71,7 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> SortBy<TSource, TKey>(this IEnumerable<TSource> source,
             Func<TSource, TKey> key)
         {
-            ValidateSortBy(source, key);
-            var sourceList = new List<TSource>();
-            foreach (var item in source)
-            {
-                sourceList.Add(item);
-            }
-
-            var sourceArray = sourceList.ToArray();
-            var keys = new TKey[sourceList.Count];
-            for (int i = 0; i < keys.Length; i++)
-            {
-                keys[i] = key(sourceList[i]);
-            }
-
-            Array.Sort(keys, sourceArray);
-            return sourceArray;
+            return SortBy(source, key, Comparer<TKey>.Default);
         }
 
         /// <summary>
@@ -105,7 +91,11 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> SortBy<TSource, TKey>(this IEnumerable<TSource> source,
             Func<TSource, TKey> key, IComparer<TKey> comparer)
         {
-            throw new NotImplementedException();
+            ValidateSortBy(source, key, comparer);
+            var sourceArray = new List<TSource>(source).ToArray();
+            var keys = new List<TKey>(sourceArray.Transform<TSource, TKey>(new Func<TSource, TKey>(x => key(x)))).ToArray();
+            Array.Sort(keys, sourceArray, comparer);
+            return sourceArray;
         }
 
         /// <summary>
@@ -168,6 +158,10 @@ namespace PseudoEnumerable
             return true;
         }
 
+
+        #endregion
+
+        #region Private methods
         private static void ValidateFilter<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
             if (source == null)
@@ -202,7 +196,8 @@ namespace PseudoEnumerable
             }
         }
 
-        private static void ValidateSortBy<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> key)
+        private static void ValidateSortBy<TSource, TKey>(this IEnumerable<TSource> source,
+            Func<TSource, TKey> key, IComparer<TKey> comparer)
         {
             if (source == null)
             {
@@ -213,6 +208,12 @@ namespace PseudoEnumerable
             {
                 throw new ArgumentNullException($"{nameof(key)} is null");
             }
-        }
+
+            if (comparer == null)
+            {
+                throw new ArgumentNullException($"{nameof(comparer)} is null");
+            }
+        } 
+        #endregion
     }
 }
