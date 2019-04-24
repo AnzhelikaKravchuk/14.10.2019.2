@@ -53,7 +53,10 @@ namespace PseudoEnumerable
         public static IEnumerable<TResult> Transform<TSource, TResult>(this IEnumerable<TSource> source,
             Func<TSource, TResult> transformer)
         {
-            throw new NotImplementedException();
+            foreach (var number in source)
+            {
+                yield return transformer(number);
+            }
         }
 
         /// <summary>
@@ -71,14 +74,7 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> SortBy<TSource, TKey>(this IEnumerable<TSource> source,
             Func<TSource, TKey> key)
         {
-            List<TSource> array = new List<TSource>(source);
-
-            array.Sort((a, b) => Comparer.Default.Compare(key(a), key(b)));
-
-            foreach (var item in array)
-            {
-                yield return item;
-            }
+            return source.SortBy(key, Comparer<TKey>.Default);
         }
 
         /// <summary>
@@ -98,7 +94,34 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> SortBy<TSource, TKey>(this IEnumerable<TSource> source,
             Func<TSource, TKey> key, IComparer<TKey> comparer)
         {
-            throw new NotImplementedException();
+            if (source is null)
+            {
+                throw new ArgumentNullException(null, $"{nameof(source)} cannot be null.");
+            }
+
+            if (key is null)
+            {
+                throw new ArgumentNullException(null, $"{nameof(key)} cannot be null.");
+            }
+
+            if (comparer is null)
+            {
+                throw new ArgumentNullException(null, $"{nameof(comparer)} cannot be null.");
+            }
+
+            return SortBy();
+
+            IEnumerable<TSource> SortBy()
+            {
+                List<TSource> array = new List<TSource>(source);
+
+                array.Sort((a, b) => comparer.Compare(key(a), key(b)));
+
+                foreach (var item in array)
+                {
+                    yield return item;
+                }
+            }
         }
 
         /// <summary>
@@ -166,8 +189,95 @@ namespace PseudoEnumerable
             }
         }
 
+        /// <summary>Gets sequence of integers starting from specified number.</summary>
+        /// <param name="start">Number to start from.</param>
+        /// <param name="count">Amount of numbers.</param>
+        /// <returns>IEnumerable&lt;int&gt;.</returns>
+        /// <exception cref="ArgumentException">count cannot be less or equals zero</exception>
+        public static IEnumerable<int> GetRange(int start, int count)
+        {
+            if (count <= 0)
+            {
+                throw new ArgumentException($"{nameof(count)} cannot be less or equals zero");
+            }
 
-        static void Validate<TSource>(IEnumerable<TSource> source, Func<TSource, bool> predicate)
+            return Range();
+
+            IEnumerable<int> Range()
+            {
+                for (int i = 0; i < count; i++)
+                {
+                    yield return start++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Sorts the elements of a sequence in descending order according to a key.
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of source.</typeparam>
+        /// <typeparam name="TKey">The type of the key returned by key.</typeparam>
+        /// <param name="source">A sequence of values to order.</param>
+        /// <param name="key">A function to extract a key from an element.</param>
+        /// <returns>
+        ///     An <see cref="IEnumerable{TSource}"/> whose elements are sorted according to a key.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="key"/> is null.</exception>
+        public static IEnumerable<TSource> SortByDescending<TSource, TKey>(this IEnumerable<TSource> source,
+            Func<TSource, TKey> key)
+        {
+            return source.SortByDescending(key, Comparer<TKey>.Default);
+        }
+
+        /// <summary>
+        /// Sorts the elements of a sequence in descending order according by using a specified comparer for a key .
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of source.</typeparam>
+        /// <typeparam name="TKey">The type of the key returned by key.</typeparam>
+        /// <param name="source">A sequence of values to order.</param>
+        /// <param name="key">A function to extract a key from an element.</param>
+        /// <param name="comparer">An <see cref="IComparer{T}"/> to compare keys.</param>
+        /// <returns>
+        ///     An <see cref="IEnumerable{TSource}"/> whose elements are sorted according to a key.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="comparer"/> is null.</exception>
+        public static IEnumerable<TSource> SortByDescending<TSource, TKey>(this IEnumerable<TSource> source,
+            Func<TSource, TKey> key, IComparer<TKey> comparer)
+        {
+            if (source is null)
+            {
+                throw new ArgumentNullException(null, $"{nameof(source)} cannot be null.");
+            }
+
+            if (key is null)
+            {
+                throw new ArgumentNullException(null, $"{nameof(key)} cannot be null.");
+            }
+
+            if (comparer is null)
+            {
+                throw new ArgumentNullException(null, $"{nameof(comparer)} cannot be null.");
+            }
+
+            return SortBy();
+
+            IEnumerable<TSource> SortBy()
+            {
+                List<TSource> array = new List<TSource>(source);
+
+                array.Sort((a, b) => comparer.Compare(key(b), key(a)));
+
+                foreach (var item in array)
+                {
+                    yield return item;
+                }
+            }
+        }
+
+        static void Validate<TSource, T>(IEnumerable<TSource> source, Func<TSource, T> predicate)
         {
             if (source is null)
             {
