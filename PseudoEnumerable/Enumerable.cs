@@ -23,13 +23,18 @@ namespace PseudoEnumerable
         {
             Validate(source, predicate);
 
-            foreach (var item in source)
+            return FilterBy();
+
+            IEnumerable<TSource> FilterBy()
             {
-                if (predicate(item))
+                foreach (var item in source)
                 {
-                    yield return item;
+                    if (predicate(item))
+                    {
+                        yield return item;
+                    }
                 }
-            }
+            }            
         }
 
         /// <summary>
@@ -66,7 +71,17 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> SortBy<TSource, TKey>(this IEnumerable<TSource> source,
             Func<TSource, TKey> key)
         {
-            throw new NotImplementedException();
+            SortedDictionary<TKey, TSource> dictionary = new SortedDictionary<TKey, TSource>();
+
+            foreach (var item in source)
+            {
+                dictionary.Add(key.Invoke(item), item);
+            }
+
+            foreach (var item in dictionary)
+            {
+                yield return item.Value;
+            }
         }
 
         /// <summary>
@@ -101,9 +116,21 @@ namespace PseudoEnumerable
         /// <exception cref="InvalidCastException">An element in the sequence cannot be cast to type TResult.</exception>
         public static IEnumerable<TResult> CastTo<TResult>(IEnumerable source)
         {
-            foreach (var item in source)
+            if (source is null)
             {
-                if (item is TResult)
+                throw new ArgumentNullException(null, $"{nameof(source)} cannot be null.");
+            }
+
+            if (source is IEnumerable<TResult> resultSource)
+            {
+                return resultSource;
+            }
+
+            return Cast();
+
+            IEnumerable<TResult> Cast()
+            {
+                foreach (var item in source)
                 {
                     yield return (TResult)item;
                 }
@@ -124,15 +151,22 @@ namespace PseudoEnumerable
         /// <exception cref="ArgumentNullException">Throws if <paramref name="predicate"/> is null.</exception>
         public static bool ForAll<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
-            foreach (var item in source)
-            {
-                if (!predicate(item))
-                {
-                    return false; 
-                }                              
-            }
+            Validate(source, predicate);
 
-            return true;
+            return ForAll();
+
+            bool ForAll()
+            {
+                foreach (var item in source)
+                {
+                    if (!predicate(item))
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
+            }
         }
 
 
