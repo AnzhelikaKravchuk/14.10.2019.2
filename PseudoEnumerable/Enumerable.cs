@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace PseudoEnumerable
 {
@@ -19,7 +20,7 @@ namespace PseudoEnumerable
         /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Throws if <paramref name="predicate"/> is null.</exception>
         public static IEnumerable<TSource> Filter<TSource>(this IEnumerable<TSource> source,
-            Func<TSource,bool> predicate)
+            Func<TSource, bool> predicate)
         {
             FilterCheckingExceptions(source, predicate);
 
@@ -42,7 +43,9 @@ namespace PseudoEnumerable
         public static IEnumerable<TResult> Transform<TSource, TResult>(this IEnumerable<TSource> source,
             Func<TSource, TResult> transformer)
         {
-            throw new NotImplementedException();
+            TransformCheckingExceptions(source, transformer);
+
+            return TransformLazyEnumeration(source, transformer);
         }
 
         /// <summary>
@@ -60,7 +63,11 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> SortBy<TSource, TKey>(this IEnumerable<TSource> source,
             Func<TSource, TKey> key)
         {
-            throw new NotImplementedException();
+            var comparer = Comparer<TKey>.Default;
+
+            SortByCheckingExceptions(source, key, comparer);
+
+            return SortBy(source, key, comparer);
         }
 
         /// <summary>
@@ -80,7 +87,18 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> SortBy<TSource, TKey>(this IEnumerable<TSource> source,
             Func<TSource, TKey> key, IComparer<TKey> comparer)
         {
-            throw new NotImplementedException();
+            SortByCheckingExceptions(source, key, comparer);
+
+            var list = new List<KeyValuePair<TKey, TSource>>();
+
+            foreach (var item in source)
+            {
+                list.Add(new KeyValuePair<TKey, TSource>(key(item), item));
+            }
+
+            list.Sort((pair1, pair2) => comparer.Compare(pair1.Key, pair2.Key));
+
+            return SortByLazyEnumeration(list);
         }
 
         /// <summary>
@@ -97,7 +115,7 @@ namespace PseudoEnumerable
         {
             CastToCheckingExceptions(source);
 
-            return CastToLazyEnumeration<TResult>(source);
+            return CastToLazyEnumeration<TResult>(source); ;
         }
 
         /// <summary>
@@ -125,6 +143,73 @@ namespace PseudoEnumerable
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// Sorts the elements of a sequence in descending order according to a key.
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of source.</typeparam>
+        /// <typeparam name="TKey">The type of the key returned by key.</typeparam>
+        /// <param name="source">A sequence of values to order.</param>
+        /// <param name="key">A function to extract a key from an element.</param>
+        /// <returns>
+        ///     An <see cref="IEnumerable{TSource}"/> whose elements are sorted according to a key.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="key"/> is null.</exception>
+        public static IEnumerable<TSource> SortByDescending<TSource, TKey>(this IEnumerable<TSource> source,
+            Func<TSource, TKey> key)
+        {
+            var comparer = Comparer<TKey>.Default;
+
+            SortByCheckingExceptions(source, key, comparer);
+
+            return SortByDescending(source, key, comparer);
+        }
+
+        /// <summary>
+        /// Sorts the elements of a sequence in ascending order descending by using a specified comparer for a key .
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of source.</typeparam>
+        /// <typeparam name="TKey">The type of the key returned by key.</typeparam>
+        /// <param name="source">A sequence of values to order.</param>
+        /// <param name="key">A function to extract a key from an element.</param>
+        /// <param name="comparer">An <see cref="IComparer{T}"/> to compare keys.</param>
+        /// <returns>
+        ///     An <see cref="IEnumerable{TSource}"/> whose elements are sorted according to a key.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="comparer"/> is null.</exception>
+        public static IEnumerable<TSource> SortByDescending<TSource, TKey>(this IEnumerable<TSource> source,
+            Func<TSource, TKey> key, IComparer<TKey> comparer)
+        {
+            SortByCheckingExceptions(source, key, comparer);
+
+            var list = new List<KeyValuePair<TKey, TSource>>();
+
+            foreach (var item in source)
+            {
+                list.Add(new KeyValuePair<TKey, TSource>(key(item), item));
+            }
+
+            list.Sort((pair1, pair2) => comparer.Compare(pair1.Key, pair2.Key) * (-1));
+
+            return SortByLazyEnumeration(list);
+        }
+
+        /// <summary>
+        /// Generates the sequence.
+        /// </summary>
+        /// <param name="start">The start.</param>
+        /// <param name="count">The count.</param>
+        ///     An <see cref="IEnumerable{TSource}"/> from start count times.
+        /// <exception cref="ArgumentException">Throws if <paramref name="count"/> is less or equal then 0.</exception>
+        public static IEnumerable<BigInteger> GenerateSequence(int start, int count)
+        {
+            GenerateSequenceCheckingExceptions(count);
+
+            return GenerateSequenceLazyEnumeration(start, count);
         }
 
         #region Private Methods
@@ -166,7 +251,7 @@ namespace PseudoEnumerable
         {
             foreach (var item in source)
             {
-                if (!predicate(item))
+                if (predicate(item))
                 {
                     yield return item;
                 }
@@ -177,14 +262,7 @@ namespace PseudoEnumerable
         {
             foreach (var item in source)
             {
-                if (item is TResult)
-                {
-                    yield return (TResult)item;
-                }
-                else
-                {
-                    throw new InvalidCastException($"Cant cast {source} items.");
-                }
+                yield return (TResult)item;
             }
         }
 
@@ -193,6 +271,80 @@ namespace PseudoEnumerable
             if (source == null)
             {
                 throw new ArgumentNullException($"{nameof(source)} must be not null.");
+            }
+
+            return true;
+        }
+
+        private static bool TransformCheckingExceptions<TSource, TResult>(IEnumerable<TSource> source,
+            Func<TSource, TResult> transformer)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException($"{nameof(source)} must be not null.");
+            }
+
+            if (transformer == null)
+            {
+                throw new ArgumentNullException($"{nameof(transformer)} must be not null.");
+            }
+
+            return true;
+        }
+
+        private static IEnumerable<TResult> TransformLazyEnumeration<TSource, TResult>(IEnumerable<TSource> source,
+            Func<TSource, TResult> transformer)
+        {
+            foreach (var item in source)
+            {
+                yield return transformer(item);
+            }
+        }
+
+        private static bool SortByCheckingExceptions<TSource, TKey>(IEnumerable<TSource> source,
+            Func<TSource, TKey> key, IComparer<TKey> comparer)
+        {
+            if (source == null)
+            {
+                throw new ArgumentNullException($"{nameof(source)} must be not null.");
+            }
+
+            if (key == null)
+            {
+                throw new ArgumentNullException($"{nameof(key)} must be not null.");
+            }
+
+            if (comparer == null)
+            {
+                throw new ArgumentNullException($"{nameof(comparer)} must be not null.");
+            }
+
+            return true;
+        }
+
+        private static IEnumerable<TSource> SortByLazyEnumeration<TSource, TKey>(IList<KeyValuePair<TKey, TSource>> list)
+        {
+            foreach (var item in list)
+            {
+                yield return item.Value;
+            }
+        }
+
+        private static IEnumerable<BigInteger> GenerateSequenceLazyEnumeration(int start, int count)
+        {
+            BigInteger begin = start;
+
+            for (int i = 0; i < count; i++)
+            {
+                yield return begin++;
+            }
+        }
+
+        private static bool GenerateSequenceCheckingExceptions(int count)
+        {
+            if (count <= 0)
+            {
+                throw new ArgumentException($"{nameof(count)} must be greater than 0.");
             }
 
             return true;
