@@ -177,6 +177,48 @@ namespace PseudoEnumerable
                 yield return start++;
             }
         }
+
+        /// <summary>
+        /// Sorts the elements of a sequence in descending order according to a key.
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of source.</typeparam>
+        /// <typeparam name="TKey">The type of the key returned by key.</typeparam>
+        /// <param name="source">A sequence of values to order.</param>
+        /// <param name="key">A function to extract a key from an element.</param>
+        /// <returns>
+        ///     An <see cref="IEnumerable{TSource}"/> whose elements are sorted according to a key.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="key"/> is null.</exception>
+        public static IEnumerable<TSource> SortByDescending<TSource, TKey>(this IEnumerable<TSource> source,
+            Func<TSource, TKey> key)
+        {
+            var result = new List<TSource>(SortBy(source, key, Comparer<TKey>.Default));
+            result.Reverse();
+            return result;
+        }
+
+        /// <summary>
+        /// Sorts the elements of a sequence in descending order according by using a specified comparer for a key .
+        /// </summary>
+        /// <typeparam name="TSource">The type of the elements of source.</typeparam>
+        /// <typeparam name="TKey">The type of the key returned by key.</typeparam>
+        /// <param name="source">A sequence of values to order.</param>
+        /// <param name="key">A function to extract a key from an element.</param>
+        /// <param name="comparer">An <see cref="IComparer{T}"/> to compare keys.</param>
+        /// <returns>
+        ///     An <see cref="IEnumerable{TSource}"/> whose elements are sorted according to a key.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="key"/> is null.</exception>
+        /// <exception cref="ArgumentNullException">Throws if <paramref name="comparer"/> is null.</exception>
+        public static IEnumerable<TSource> SortByDescending<TSource, TKey>(this IEnumerable<TSource> source,
+            Func<TSource, TKey> key, IComparer<TKey> comparer)
+        {
+            var result = new List<TSource>(SortBy(source, key, comparer));
+            result.Reverse();
+            return result;
+        }
         #endregion
 
         #region Private methods

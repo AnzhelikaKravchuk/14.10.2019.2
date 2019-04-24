@@ -58,6 +58,9 @@ namespace PseudoEnumerable.Tests
 
         [TestCase(new string[] { "ad", "aaa", "ddd", "ccccc" }, new int[] { 2, 3, 3, 5 })]
         [TestCase(new string[] { "", "efw", "1", "d3ac" }, new int[] { 0, 3, 1, 4 })]
+        [TestCase(new string[] { "1", "333", "55555", "999999999", "" }, new int[] { 1, 3 ,5, 9, 0 })]
+        [TestCase(new string[] { }, new int[] { })]
+        [TestCase(new string[] { "", "awdfgaa", "123456789" }, new int[] { 0, 7, 9 })]
         public void Transform_TSourceIsString_Tests(IEnumerable<string> source, IEnumerable<int> expected)
         {
             var result = new List<int>();
@@ -71,6 +74,8 @@ namespace PseudoEnumerable.Tests
 
         [TestCase(new string[] { "ad", "aaa", "ddd", "ccccc" }, true)]
         [TestCase(new string[] { "", "efw", "1", "d3ac" }, false)]
+        [TestCase(new string[] { "asdasd", "123", " ", "    " }, true)]
+        [TestCase(new string[] { }, true)]
         public void ForAll_Tests(IEnumerable<string> source, bool expected)
         {
             Assert.AreEqual(source.ForAll(new Func<string, bool>(x => x.Length != 0)), expected);
@@ -106,6 +111,33 @@ namespace PseudoEnumerable.Tests
             CollectionAssert.AreEqual(expected, actual);
         }
 
+        [TestCase(new string[] { "4444", "22", "666666", "1", "", "333" },
+            new string[] { "666666", "4444", "333", "22", "1", "" })]
+        [TestCase(new string[] { "abc", "a", "abcde", "abcdefg" },
+            new string[] { "abcdefg", "abcde", "abc", "a" })]
+        [TestCase(new string[] { },
+            new string[] { })]
+        [TestCase(new string[] { "one element" },
+            new string[] { "one element" })]
+        [TestCase(new string[] { "12345", "1234", "123", "12", "1", "" },
+            new string[] { "12345", "1234", "123", "12", "1", "" })]
+        public void SortByDescending_KeyIsIntegerDefaultComparer_Tests(IEnumerable<string> source, IEnumerable<string> expected)
+        {
+            var actual = source.SortByDescending(new Func<string, int>(x => x.Length));
+            CollectionAssert.AreEqual(expected, actual);
+        }
+
+        [TestCase(new string[] { "4444", "22", "666666", "1", "", "333" },
+            new string[] { "", "1", "22", "333", "4444", "666666" })]
+        [TestCase(new string[] { "a", "aaa", "a", "aa", "aaaaaaaaaaa", "aaaaaa" },
+            new string[] { "a", "a", "aa", "aaa", "aaaaaa", "aaaaaaaaaaa" })]
+        [TestCase(new string[] { },
+            new string[] { })]
+        public void SortByDescending_KeyIsIntegerCustomComparer_Tests(IEnumerable<string> source, IEnumerable<string> expected)
+        {
+            var actual = source.SortByDescending(new Func<string, int>(x => x.Length), new DescendingOrderComparer());
+            CollectionAssert.AreEqual(expected, actual);
+        }
 
     }
 }
