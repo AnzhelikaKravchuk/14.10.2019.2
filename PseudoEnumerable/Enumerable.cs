@@ -21,7 +21,23 @@ namespace PseudoEnumerable
         public static IEnumerable<TSource> Filter<TSource>(this IEnumerable<TSource> source,
             Func<TSource,bool> predicate)
         {
-            throw new NotImplementedException();
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            if (predicate == null)
+            {
+                throw new ArgumentNullException(nameof(predicate));
+            }
+
+            foreach (var item in source)
+            {
+                if (!predicate(item))
+                {
+                    yield return item;
+                }
+            }
         }
 
         /// <summary>
@@ -40,7 +56,20 @@ namespace PseudoEnumerable
         public static IEnumerable<TResult> Transform<TSource, TResult>(this IEnumerable<TSource> source,
             Func<TSource, TResult> transformer)
         {
-            throw new NotImplementedException();
+            if (source == null)
+            {
+                throw new ArgumentNullException(nameof(source));
+            }
+
+            if (transformer == null)
+            {
+                throw new ArgumentNullException(nameof(transformer));
+            }
+
+            foreach (var item in source)
+            {
+                yield return transformer(item);
+            }
         }
 
         /// <summary>
