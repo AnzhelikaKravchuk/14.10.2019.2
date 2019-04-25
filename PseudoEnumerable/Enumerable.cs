@@ -281,7 +281,7 @@ namespace PseudoEnumerable
             Comparer<T> defaultComparer = Comparer<T>.Default;            
             if (defaultComparer is null)
             {
-                throw new ArgumentException($"{nameof(defaultComparer)} can be null only if type has its own implementation of IComparable");
+                throw new InvalidOperationException($"{nameof(defaultComparer)} can be null only if type has its own implementation of IComparable");
             }
         }
 
