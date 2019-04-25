@@ -166,7 +166,7 @@ namespace PseudoEnumerable
         {
             Validation(source, key);
 
-            return (TSource[])SortByEnumerator(source, key, Comparer<TKey>.Default).Reverse();
+            return SortByDescendingEnumerator(source, key, Comparer<TKey>.Default);
         }
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace PseudoEnumerable
                 throw new ArgumentNullException($"{nameof(comparer)} is null.");
             }
 
-            return (TSource[])SortByEnumerator(source, key, comparer).Reverse();
+            return SortByDescendingEnumerator(source, key, comparer);
         }
 
         /// <summary>
@@ -254,18 +254,52 @@ namespace PseudoEnumerable
         private static IEnumerable<TSource> SortByEnumerator<TSource, TKey>(IEnumerable<TSource> source,
             Func<TSource, TKey> key, IComparer<TKey> comparer)
         {
-            for (int i = 0; i < source.Count() - 1; i++)
+            TSource[] array = source.ToArray();
+
+            for (int i = 0; i < array.Length - 1; i++)
             {
-                for (int j = i + 1; j < source.Count(); j++)
+                for (int j = i + 1; j < array.Length; j++)
                 {
-                    if (comparer.Compare(key(source.ElementAt(i)), key(source.ElementAt(j))) > 0)
+                    if (comparer.Compare(key(array[i]), key(array[j])) > 0)
                     {
-                        source = source.Swap(i, j);
+                         Swap(ref array[i], ref array[j]);
                     }
                 }
             }
 
-            return source;
+            return array;
+        }
+
+        private static IEnumerable<TSource> SortByDescendingEnumerator<TSource, TKey>(IEnumerable<TSource> source,
+            Func<TSource, TKey> key, IComparer<TKey> comparer)
+        {
+            TSource[] array = source.ToArray();
+
+            for (int i = 0; i < array.Length - 1; i++)
+            {
+                for (int j = i + 1; j < array.Length; j++)
+                {
+                    if (comparer.Compare(key(array[i]), key(array[j])) < 0)
+                    {
+                        Swap(ref array[i], ref array[j]);
+                    }
+                }
+            }
+
+            return array;
+        }
+
+        private static T[] ToArray<T>(this IEnumerable<T> sequence)
+        {
+            T[] resultedArray = new T[sequence.Count()];
+            int counter = 0;
+
+            foreach (T element in sequence)
+            {
+                resultedArray[counter++] = element;
+            }
+
+            return resultedArray;
         }
 
         private static IEnumerable<TResult> CastToEnumerator<TResult>(IEnumerable source)
@@ -300,6 +334,13 @@ namespace PseudoEnumerable
 
                 currentIndex++;
             }
+        }
+
+        private static void Swap<T>(ref T item1, ref T item2)
+        {
+            T temp = item1;
+            item1 = item2;
+            item2 = temp;
         }
 
         private static int Count<T>(this IEnumerable<T> source)

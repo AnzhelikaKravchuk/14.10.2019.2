@@ -201,7 +201,7 @@ namespace PseudoEnumerable.Tests
         [TestCase(new int[] { 1 }, ExpectedResult = new int[] { 1 })]
         [TestCase(new int[] { 1, 2, 3, 4, 5 }, ExpectedResult = new int[] { 5, 4, 3, 2, 1 })]
         [TestCase(new int[] { 1, 4, -8, 7, -3, -2 }, ExpectedResult = new int[] { -8, 7, 4, -3, -2, 1 })]
-        [TestCase(new int[] { 2, -2, 2, -2, 2, -2 }, ExpectedResult = new int[] { -2, 2, -2, 2, -2, 2 })]
+        [TestCase(new int[] { 2, -2, 2, -2, 2, -2 }, ExpectedResult = new int[] { 2, -2, 2, -2, 2, -2 })]
         public static IEnumerable<int> SortByDescending_IntValidCases_ExpectedResult(IEnumerable<int> source)
         {
             return source.SortByDescending(x => (int)Math.Pow(x, 2));
@@ -218,7 +218,7 @@ namespace PseudoEnumerable.Tests
 
         [Test]
         [TestCase(new string[] { "q" }, new string[] { "q" })]
-        [TestCase(new string[] { "q", "w", "e", "r", "t" }, new string[] { "t", "r", "e", "w", "q" })]
+        [TestCase(new string[] { "q", "w", "e", "r", "t" }, new string[] { "q", "w", "e", "r", "t" })]
         [TestCase(new string[] { "qwe", "qwer", "q", "qwert", "qw" }, new string[] { "qwert", "qwer", "qwe", "qw", "q" })]
         [TestCase(new string[] { "124314", "3", "3536", "13243", "353535353" }, new string[] { "353535353", "124314", "13243", "3536", "3" })]
         public static void SortByDescending_StringValidCases_ExpectedResult(IEnumerable<string> input, IEnumerable<string> expected)
@@ -229,7 +229,7 @@ namespace PseudoEnumerable.Tests
         [Test]
         [TestCase(new string[] { "q" }, new string[] { "q" })]
         [TestCase(new string[] { "KLA", "AA", "QWE" }, new string[] { "AA", "KLA", "QWE" })]
-        [TestCase(new string[] { "QWE", "WTREWT", "VNMV", "RYIYIYRR" }, new string[] { "RYIYIYRR", "VNMV", "WTREWT", "QWE" })]
+        [TestCase(new string[] { "QWE", "WTREWT", "VNMV", "RYIYIYRR" }, new string[] { "QWE", "WTREWT", "VNMV", "RYIYIYRR" })]
         [TestCase(new string[] { "AFDDA", "QAWASAFAA", "FHGJJDGDVNV", "AAA" }, new string[] { "QAWASAFAA", "AAA", "AFDDA", "FHGJJDGDVNV" })]
         public static void SortByDescending_StringValidCasesWithCustomComparer_ExpectedResult(IEnumerable<string> input, IEnumerable<string> expected)
         {
