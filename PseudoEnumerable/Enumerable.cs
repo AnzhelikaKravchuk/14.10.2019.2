@@ -124,11 +124,19 @@ namespace PseudoEnumerable
                 throw new ArgumentNullException($"Key cannot be null. Parameter name: { nameof(key) }.");
             }
 
+            return SortByLazy(source, key, comparer);
+        }
+
+        private static IEnumerable<TSource> SortByLazy<TSource, TKey>(IEnumerable<TSource> source, Func<TSource, TKey> key, IComparer<TKey> comparer)
+        {
             var sortedList = new List<TSource>(source);
             var comparerKeys = new ComparerStrategy<TSource, TKey>(key, comparer);
             sortedList.Sort(comparerKeys);
 
-            return sortedList;
+            foreach(var element in sortedList)
+            {
+                yield return element;
+            }
         }
 
         /// <summary>
@@ -181,7 +189,7 @@ namespace PseudoEnumerable
         /// </returns>
         /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
         /// <exception cref="InvalidCastException">An element in the sequence cannot be cast to type TResult.</exception>
-        public static IEnumerable<TResult> CastTo<TResult>(IEnumerable source)
+        public static IEnumerable<TResult> CastTo<TResult>(this IEnumerable source)
         {
             if (source == null)
             {
