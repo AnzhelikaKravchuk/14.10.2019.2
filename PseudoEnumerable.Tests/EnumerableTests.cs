@@ -5,8 +5,7 @@ using PseudoEnumerable.Tests.Comparers;
 using System.Numerics;
 using NUnit;
 using NUnit.Framework;
-
-
+using System.Collections;
 
 namespace PseudoEnumerable.Tests
 {
@@ -14,6 +13,20 @@ namespace PseudoEnumerable.Tests
     public class EnumerableTests
     {
         #region Filter tests
+        [Test]
+        public void Filter_SourceIsNull_ThrowsArgumentNullException()
+        {
+            int[] array = null;
+            Assert.Catch<ArgumentNullException>(() => array.Filter(x => x > 1));
+        }
+
+        [Test]
+        public void Filter_PredicateIsNull_ThrowsArgumentNullException()
+        {
+            int[] array = new int[] { 123, 456 };
+            Assert.Catch<ArgumentNullException>(() => array.Filter(null));
+        }
+
         [TestCase(new int[] { 1, 2, 3, 4, 5, 6 }, ExpectedResult = new int[] { 2, 4, 6 })]
         [TestCase(new int[] { 0, 21, 41, 21, 76, 26 }, ExpectedResult = new int[] { 0, 76, 26 })]
         [TestCase(new int[] { 11, 21, 41, 21 }, ExpectedResult = new int[] { })]
@@ -43,10 +56,24 @@ namespace PseudoEnumerable.Tests
             }
 
             CollectionAssert.AreEqual(result, expected);
-        } 
+        }
         #endregion
 
         #region Transform tests
+        [Test]
+        public void Transform_SourceIsNull_ThrowsArgumentNullException()
+        {
+            int[] array = null;
+            Assert.Catch<ArgumentNullException>(() => array.Transform(x => x.ToString()));
+        }
+
+        [Test]
+        public void Transform_TransformerIsNull_ThrowsArgumentNullException()
+        {
+            int[] array = new int[] { 123, 456};
+            Assert.Catch<ArgumentNullException>(() => array.Transform<int, string>(null));
+        }
+
         [TestCase(new int[] { 1, 2, 3, 4, 5, 6 }, ExpectedResult = new int[] { 2, 4, 6, 8, 10, 12 })]
         [TestCase(new int[] { 0, 14, 21, 1, 3 }, ExpectedResult = new int[] { 0, 28, 42, 2, 6 })]
         [TestCase(new int[] { }, ExpectedResult = new int[] { })]
@@ -75,10 +102,24 @@ namespace PseudoEnumerable.Tests
             }
 
             CollectionAssert.AreEqual(result, expected);
-        } 
+        }
         #endregion
 
         #region ForAll tests
+        [Test]
+        public void ForAll_SourceIsNull_ThrowsArgumentNullException()
+        {
+            int[] array = null;
+            Assert.Catch<ArgumentNullException>(() => array.ForAll(x => x == 1));
+        }
+
+        [Test]
+        public void ForAll_PredicateIsNull_ThrowsArgumentNullException()
+        {
+            int[] array = new int[] { 1, 2, 7};
+            Assert.Catch<ArgumentNullException>(() => array.ForAll(null));
+        }
+
         [TestCase(new string[] { "ad", "aaa", "ddd", "ccccc" }, true)]
         [TestCase(new string[] { "", "efw", "1", "d3ac" }, false)]
         [TestCase(new string[] { "asdasd", "123", " ", "    " }, true)]
@@ -171,6 +212,37 @@ namespace PseudoEnumerable.Tests
             Assert.Catch<ArgumentOutOfRangeException>(() => Enumerable.IntegerGenerator(-1, 0));
         #endregion
 
+        #region CastTo tests
+        [TestCase(arg: new object[] { 12, "hi" })]
+        [TestCase(arg: new object[] { "hi", 12 })]
+        [TestCase(arg: new object[] { "hi", "12", "21", 123 })]
+        [TestCase(arg: new object[] { "hi", "22", null })]
+        public void CastToTests_WithNotStringElement_ThrowInvalidCastException(IEnumerable source)
+        {
+            
+            using (var iterator = Enumerable.CastTo<string>(source).GetEnumerator())
+            {
+                try
+                {
+                    while (iterator.MoveNext()) { }
+                }
+                catch (Exception ex)
+                {
+                    Assert.IsTrue(ex.GetType() == typeof(InvalidCastException));
+                }
+            }
+        }
 
+        [TestCase(arg: new object[] { "hi", "22", "null" })]
+        [TestCase(arg: new object[] { "123", "342", "adwwad", "wadaada" })]
+        [TestCase(arg: new object[] { " ", "  ", "", "wadaada" })]
+        [TestCase(arg: new object[] { })]
+        public void CastTo_Tests(IEnumerable source)
+        {
+            var actual = source.CastTo<string>();
+            var expected = source.Cast<string>();
+            CollectionAssert.AreEqual(expected, actual);
+        }
+        #endregion
     }
 }

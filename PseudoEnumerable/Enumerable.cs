@@ -24,14 +24,7 @@ namespace PseudoEnumerable
             Func<TSource, bool> predicate)
         {
             ValidateFilter(source, predicate);
-
-            foreach (var item in source)
-            {
-                if (predicate(item))
-                {
-                    yield return item;
-                }
-            }
+            return FilterHelper(source, predicate);
         }
 
         /// <summary>
@@ -51,10 +44,7 @@ namespace PseudoEnumerable
             Func<TSource, TResult> transformer)
         {
             ValidateTransform(source, transformer);
-            foreach (var item in source)
-            {
-                yield return transformer(item);
-            }
+            return TransformHelper(source, transformer);
         }
 
         /// <summary>
@@ -114,14 +104,7 @@ namespace PseudoEnumerable
             ValidateCastTo(source);
             foreach (var item in source)
             {
-                if (item is TResult)
-                {
-                    yield return (TResult)item;
-                }
-                else
-                {
-                    throw new InvalidCastException($"cannot cast to {typeof(TResult)}");
-                }
+                yield return (TResult)item;
             }
         }
 
@@ -222,6 +205,27 @@ namespace PseudoEnumerable
         #endregion
 
         #region Private methods
+        private static IEnumerable<TSource> FilterHelper<TSource>(IEnumerable<TSource> source,
+            Func<TSource, bool> predicate)
+        {
+            foreach (var item in source)
+            {
+                if (predicate(item))
+                {
+                    yield return item;
+                }
+            }
+        }
+
+        private static IEnumerable<TResult> TransformHelper<TSource, TResult>(IEnumerable<TSource> source,
+            Func<TSource, TResult> transformer)
+        {
+            foreach (var item in source)
+            {
+                yield return transformer(item);
+            }
+        }
+
         private static void ValidateFilter<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
         {
             if (source == null)
