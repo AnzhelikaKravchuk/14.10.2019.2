@@ -188,7 +188,7 @@ namespace PseudoEnumerable
         /// </returns>
         /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
         /// <exception cref="InvalidCastException">An element in the sequence cannot be cast to type TResult.</exception>
-        public static IEnumerable<TResult> CastTo<TResult>(IEnumerable source)
+        public static IEnumerable<TResult> CastTo<TResult>(this IEnumerable source)
         {
             if (source is null)
             {
@@ -206,18 +206,9 @@ namespace PseudoEnumerable
             {
                 foreach (var item in source)
                 {
-                    if (item is TResult)
-                    {
-                        yield return (TResult)item;
-                    }
-                    else
-                    {
-                        throw new InvalidCastException($"An element in the sequence cannot be cast to type TResult");
-                    }
+                    yield return (TResult)item;
                 }
             }
-
-
         }
 
         /// <summary>
@@ -253,7 +244,7 @@ namespace PseudoEnumerable
             if (source is null)
             {
                 throw new ArgumentNullException($"{nameof(source)} is null");
-            }           
+            }
         }
 
         private static void Validation<T>(IEnumerable<T> source, object predicate)
@@ -277,8 +268,8 @@ namespace PseudoEnumerable
         }
 
         private static void CheckIfComparable<T>()
-        {            
-            Comparer<T> defaultComparer = Comparer<T>.Default;            
+        {
+            Comparer<T> defaultComparer = Comparer<T>.Default;
             if (defaultComparer is null)
             {
                 throw new InvalidOperationException($"{nameof(defaultComparer)} can be null only if type has its own implementation of IComparable");

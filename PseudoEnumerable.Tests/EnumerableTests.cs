@@ -41,9 +41,8 @@ namespace PseudoEnumerable.Tests
                2,
                3,
                4
-           };
-            Enumerable.CastTo<int>(list);
-            CollectionAssert.AreEqual(new List<int> { 1, 2, 3, 4 }, list);
+           };          
+            CollectionAssert.AreEqual(new List<int> { 1, 2, 3, 4 }, list.CastTo<int>());
         }
 
         [Test]
@@ -61,7 +60,7 @@ namespace PseudoEnumerable.Tests
                4
            };
 
-            Assert.Throws<InvalidCastException>(() => CollectionAssert.AreEqual(new List<string> { "1", "2", "3", "4" }, Enumerable.CastTo<string>(list)));
+            Assert.Throws<InvalidCastException>(() => CollectionAssert.AreEqual(new List<string> { "1", "2", "3", "4" }, list.CastTo<string>()));
         }
 
         [Test]
