@@ -94,7 +94,7 @@ namespace PseudoEnumerable
         {
             ValidateSortBy(source, key, comparer);
             var sourceArray = new List<TSource>(source).ToArray();
-            var keys = new List<TKey>(sourceArray.Transform<TSource, TKey>(new Func<TSource, TKey>(x => key(x)))).ToArray();
+            var keys = new List<TKey>(sourceArray.Transform<TSource, TKey>(x => key(x))).ToArray();
             Array.Sort(keys, sourceArray, comparer);
             return sourceArray;
         }
@@ -109,7 +109,7 @@ namespace PseudoEnumerable
         /// </returns>
         /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
         /// <exception cref="InvalidCastException">An element in the sequence cannot be cast to type TResult.</exception>
-        public static IEnumerable<TResult> CastTo<TResult>(IEnumerable source)
+        public static IEnumerable<TResult> CastTo<TResult>(this IEnumerable source)
         {
             ValidateCastTo(source);
             foreach (var item in source)
