@@ -44,7 +44,6 @@ namespace PseudoEnumerable
         {
             CatchExceptionNull(source);
             CatchExceptionNull(transformer);
-
             return TransformToLazy(source, transformer);
         }
 
@@ -65,7 +64,7 @@ namespace PseudoEnumerable
         {
             CatchExceptionNull(source);
             CatchExceptionNull(key);
-            return source.SortByComparer(key, null);           
+            return source.SortByComparer(key, Comparer<TKey>.Default);           
         }
 
         /// <summary>
@@ -147,7 +146,7 @@ namespace PseudoEnumerable
         /// </returns>
         /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
         /// <exception cref="InvalidCastException">An element in the sequence cannot be cast to type TResult.</exception>
-        public static IEnumerable<TResult> CastTo<TResult>(IEnumerable source)
+        public static IEnumerable<TResult> CastTo<TResult>(this IEnumerable source)
         {
             CatchExceptionNull(source);
 
@@ -232,13 +231,21 @@ namespace PseudoEnumerable
         private static IEnumerable<TSource> SortByComparer<TSource, TKey>(this IEnumerable<TSource> source,
             Func<TSource, TKey> key, IComparer<TKey> comparer)
         {
-            SortedDictionary<TKey, TSource> dict = new SortedDictionary<TKey, TSource>(comparer);
-            foreach (var element in source)
+            List<TSource> sourceList = new List<TSource>(source);
+            List<TKey> keyList = new List<TKey>(sourceList.Count);
+
+            foreach (var element in sourceList)
             {
-                dict.Add(key(element), element);
+                keyList.Add(key(element));              
             }
 
-            return dict.Values;
+            TSource[] sourceArray = sourceList.ToArray();
+            Array.Sort(keyList.ToArray(), sourceArray, comparer);
+
+            foreach (var element in sourceArray)
+            {
+                yield return element;
+            }
         }
 
         private static IEnumerable<TResult> CastToLazy<TResult>(IEnumerable source)
