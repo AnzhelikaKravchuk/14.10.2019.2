@@ -291,7 +291,7 @@ namespace PseudoEnumerable
                 throw new ArgumentOutOfRangeException("Count is less than 0.");
             }
 
-            if (start + count - 1 < start - 1)
+            if ((long)start + count - 1 > int.MaxValue)
             {
                 throw new ArgumentOutOfRangeException("start + count - 1 is larger than MaxValue.");
             }

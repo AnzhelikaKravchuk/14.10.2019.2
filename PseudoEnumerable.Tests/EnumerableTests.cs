@@ -319,6 +319,7 @@ namespace PseudoEnumerable.Tests
         [TestCase(0, 0, ExpectedResult = new int[0])]
         [TestCase(0, 5, ExpectedResult = new int[] { 0, 1, 2, 3, 4 })]
         [TestCase(-100, 2, ExpectedResult = new int[] { -100, -99 })]
+        [TestCase(int.MinValue, 2, ExpectedResult = new int[] { int.MinValue, int.MinValue + 1 })]
         public IEnumerable<int> RangeTests(int start, int count)
         {
             return new List<int>(Enumerable.Range(start, count));
