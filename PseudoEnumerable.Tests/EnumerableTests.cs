@@ -81,7 +81,27 @@ namespace PseudoEnumerable.Tests
 
         #endregion
 
-        #region 
+        #region Tests for SortBy
+
+        private static IEnumerable<TestCaseData> DataCaseSortByAscendingInt
+        {
+            get
+            {
+                yield return new TestCaseData(new int[] { 5, 2, 3, 1, 4 }).Returns(new List<int> { 1, 2, 3, 4, 5 });
+                yield return new TestCaseData(new int[] { 9, 7, 5, 3, 1, 8, 6, 4, 2 }).Returns(new List<int> { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
+                yield return new TestCaseData(new int[] { 1, 1, 1, 1, 1, 1 }).Returns(new List<int> { 1, 1, 1, 1, 1, 1 });
+                yield return new TestCaseData(new int[] { -1, -2, -3, -4, -5 }).Returns(new List<int> { -5, -4, -3, -2, -1 });
+            }
+        }
+
+        [TestCaseSource(nameof(DataCaseSortByAscendingInt))]
+        public List<int> SotrBy_ValidArgumentString_ValidResult(int[] array)
+        {
+            return new List<int>( array.SortBy(i => i));
+            
+        }
+
+        #endregion
 
     }
 }
