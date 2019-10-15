@@ -18,7 +18,7 @@ namespace PseudoEnumerable
         /// </returns>
         /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Throws if <paramref name="predicate"/> is null.</exception>
-        public static IEnumerable<TSource> Filter<TSource>(this IEnumerable<TSource> source,
+        public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source,
             Func<TSource,bool> predicate)
         {
             throw new NotImplementedException();
