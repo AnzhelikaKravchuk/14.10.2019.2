@@ -19,7 +19,7 @@ namespace PseudoEnumerable
         /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Throws if <paramref name="predicate"/> is null.</exception>
         public static IEnumerable<TSource> Where<TSource>(this IEnumerable<TSource> source,
-            Func<TSource,bool> predicate)
+            Func<TSource, bool> predicate)
         {
             throw new NotImplementedException();
         }
@@ -108,45 +108,47 @@ namespace PseudoEnumerable
         /// </returns>
         /// <exception cref="ArgumentNullException">Throws if <paramref name="source"/> is null.</exception>
         /// <exception cref="ArgumentNullException">Throws if <paramref name="predicate"/> is null.</exception>
-        public static bool ForAll<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
+        public static bool ForAll<TSource>(this IEnumerable<TSource> source, 
+            Func<TSource, bool> predicate)
         {
             throw new NotImplementedException();
         }
-        
+
         public static IEnumerable<int> Range(int start, int count)
-	    {
-		    throw new NotImplementedException();
-	    }
+        {
+            throw new NotImplementedException();
+        }
 
-	    public static IEnumerable<TSource> Reverse<TSource>(this IEnumerable<TSource> source)
-	    {
-		    throw new NotImplementedException();
-	    }
-        
-        public static int Count<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
-	    {
-		    throw new NotImplementedException();
-	    }
+        public static IEnumerable<TSource> Reverse<TSource>(this IEnumerable<TSource> source)
+        {
+            throw new NotImplementedException();
+        }
 
-	    public static int Count<TSource>(this IEnumerable<TSource> source)
-	    {
-		     throw new NotImplementedException();
-	    }
+        public static int Count<TSource>(this IEnumerable<TSource> source, 
+            Func<TSource, bool> predicate)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static int Count<TSource>(this IEnumerable<TSource> source)
+        {
+            throw new NotImplementedException();
+        }
     }
-    
+
     internal struct BufferData<T>
     {
-	    internal T[] items;
-	    internal int count;
+        internal T[] items;
+        internal int count;
 
-	    internal BufferData(IEnumerable<T> source)
-	    {
-		    throw new NotImplementedException();
-	    }
+        internal BufferData(IEnumerable<T> source)
+        {
+            throw new NotImplementedException();
+        }
 
-	    internal T[] ToArray()
-	    {
-		    throw new NotImplementedException();
-	    }
+        internal T[] ToArray()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

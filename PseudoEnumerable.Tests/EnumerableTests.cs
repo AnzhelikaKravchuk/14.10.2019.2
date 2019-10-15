@@ -12,10 +12,6 @@ namespace PseudoEnumerable.Tests
     [TestFixture]
     public class EnumerableTests
     {
-        public void Test()
-        {
-            int[] array = new[] {1, 2, 3, 4};
-            PseudoEnumerable.Enumerable.Where(array,x => x > 0);
-        }
+
     }
 }
