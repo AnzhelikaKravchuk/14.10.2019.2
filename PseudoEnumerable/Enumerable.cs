@@ -112,5 +112,41 @@ namespace PseudoEnumerable
         {
             throw new NotImplementedException();
         }
+        
+        public static IEnumerable<int> Range(int start, int count)
+	    {
+		    throw new NotImplementedException();
+	    }
+
+	    public static IEnumerable<TSource> Reverse<TSource>(this IEnumerable<TSource> source)
+	    {
+		    throw new NotImplementedException();
+	    }
+        
+        public static int Count<TSource>(this IEnumerable<TSource> source, Func<TSource, bool> predicate)
+	    {
+		    throw new NotImplementedException();
+	    }
+
+	    public static int Count<TSource>(this IEnumerable<TSource> source)
+	    {
+		     throw new NotImplementedException();
+	    }
+    }
+    
+    internal struct BufferData<T>
+    {
+	    internal T[] items;
+	    internal int count;
+
+	    internal BufferData(IEnumerable<T> source)
+	    {
+		    throw new NotImplementedException();
+	    }
+
+	    internal T[] ToArray()
+	    {
+		    throw new NotImplementedException();
+	    }
     }
 }
